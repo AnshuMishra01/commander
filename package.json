@@ -1,6 +1,6 @@
 {
   "name": "coderdodo",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Natural language to shell commands via local Ollama LLM. Just describe what you want, get the command.",
   "bin": {
     "coderdodo": "./dist/cli.js"

@@ -26,14 +26,26 @@ export function getSystemContext(): SystemContext {
       osName = platform;
   }
 
-  const shellPath = process.env.SHELL || '/bin/sh';
-  const shell = path.basename(shellPath);
+  let shell: string;
+  if (platform === 'win32') {
+    // Detect PowerShell vs cmd on Windows
+    const comspec = process.env.COMSPEC || '';
+    const psModulePath = process.env.PSModulePath || '';
+    if (psModulePath || comspec.toLowerCase().includes('powershell')) {
+      shell = 'PowerShell';
+    } else {
+      shell = 'cmd.exe';
+    }
+  } else {
+    const shellPath = process.env.SHELL || '/bin/sh';
+    shell = path.basename(shellPath);
+  }
 
   return {
     os: osName,
     shell,
     cwd: process.cwd(),
-    home: process.env.HOME || os.homedir(),
-    user: process.env.USER || os.userInfo().username,
+    home: process.env.HOME || process.env.USERPROFILE || os.homedir(),
+    user: process.env.USER || process.env.USERNAME || os.userInfo().username,
   };
 }
