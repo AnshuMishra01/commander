@@ -1,0 +1,44 @@
+{
+  "name": "coderdodo",
+  "version": "1.1.0",
+  "description": "Natural language to shell commands via local Ollama LLM. Just describe what you want, get the command.",
+  "bin": {
+    "coderdodo": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "cli",
+    "terminal",
+    "shell",
+    "natural-language",
+    "ai",
+    "ollama",
+    "command-generator",
+    "devtools"
+  ],
+  "author": "Anshu Mishra",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AnshuMishra01/commander.git"
+  },
+  "homepage": "https://github.com/AnshuMishra01/commander#readme",
+  "bugs": {
+    "url": "https://github.com/AnshuMishra01/commander/issues"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^18.0.0"
+  }
+}
