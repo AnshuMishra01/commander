@@ -18,9 +18,12 @@ export function askConfirmation(prompt: string): Promise<boolean> {
 }
 
 export function runCommand(command: string): void {
+  const shell = process.platform === 'win32'
+    ? process.env.COMSPEC || 'cmd.exe'
+    : process.env.SHELL || '/bin/sh';
   execSync(command, {
     stdio: 'inherit',
-    shell: process.env.SHELL || '/bin/sh',
+    shell,
     cwd: process.cwd(),
   });
 }

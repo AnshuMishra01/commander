@@ -65,36 +65,29 @@ $ coderdodo run the voxship backend docker container with port 8080 exposed
 - **Confirm before execute** — shows the command, you press Enter to run or `n` to cancel
 - **Context-aware** — detects your OS, shell, and current directory for accurate commands
 - **100% local** — runs on Ollama, no API keys, no cloud, your data stays on your machine
-- **Tiny footprint** — 1 runtime dependency (`chalk`), ~14KB total
+- **Tiny footprint** — 1 runtime dependency (`chalk`), ~25KB total
+- **Cross-platform** — works on macOS, Linux, and Windows
+- **Zero setup** — auto-starts Ollama and auto-pulls the model on first run
 
 ---
 
 ## Installation
 
-### Prerequisites
+### 1. Install Ollama
 
-Install [Ollama](https://ollama.com) and pull a model:
+| Platform | Command |
+|---|---|
+| **macOS** | `brew install ollama` |
+| **Linux** | `curl -fsSL https://ollama.com/install.sh \| sh` |
+| **Windows** | Download from [ollama.com/download](https://ollama.com/download/windows) |
 
-```bash
-# macOS
-brew install ollama
-
-# Or download from https://ollama.com/download
-
-# Start Ollama
-ollama serve
-
-# Pull the default model (986MB, code-specialized)
-ollama pull qwen2.5-coder:1.5b
-```
-
-### Install coderdodo
+### 2. Install coderdodo
 
 ```bash
-npm install -g coderdodo
+npm i -g coderdodo
 ```
 
-That's it. You're ready to go.
+That's it. **No other setup needed.** On first run, coderdodo will automatically start Ollama and download the model for you.
 
 ---
 

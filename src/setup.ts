@@ -4,7 +4,8 @@ import chalk from 'chalk';
 
 function isOllamaInstalled(): boolean {
   try {
-    execSync('which ollama', { stdio: 'pipe' });
+    const cmd = process.platform === 'win32' ? 'where ollama' : 'which ollama';
+    execSync(cmd, { stdio: 'pipe' });
     return true;
   } catch {
     return false;
@@ -22,9 +23,12 @@ async function isOllamaRunning(): Promise<boolean> {
 
 async function startOllama(): Promise<void> {
   console.error(chalk.gray('  Starting Ollama...'));
-  const child = spawn('ollama', ['serve'], {
+  const isWin = process.platform === 'win32';
+  const child = spawn(isWin ? 'ollama.exe' : 'ollama', ['serve'], {
     stdio: 'ignore',
-    detached: true,
+    detached: !isWin,
+    shell: isWin,
+    windowsHide: true,
   });
   child.unref();
 
@@ -67,6 +71,7 @@ export async function ensureReady(model: string): Promise<void> {
     let installCmd = 'Visit https://ollama.com/download';
     if (platform === 'darwin') installCmd = 'brew install ollama';
     else if (platform === 'linux') installCmd = 'curl -fsSL https://ollama.com/install.sh | sh';
+    else if (platform === 'win32') installCmd = 'Download from https://ollama.com/download/windows';
 
     showError(`Ollama is not installed. Install it with:\n\n  ${installCmd}\n`);
     process.exit(1);
