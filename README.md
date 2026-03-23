@@ -67,27 +67,22 @@ $ coderdodo run the voxship backend docker container with port 8080 exposed
 - **100% local** — runs on Ollama, no API keys, no cloud, your data stays on your machine
 - **Tiny footprint** — 1 runtime dependency (`chalk`), ~25KB total
 - **Cross-platform** — works on macOS, Linux, and Windows
-- **Zero setup** — auto-starts Ollama and auto-pulls the model on first run
+- **Zero setup** — auto-installs Ollama, auto-starts it, and auto-pulls the model on first run
 
 ---
 
 ## Installation
 
-### 1. Install Ollama
-
-| Platform | Command |
-|---|---|
-| **macOS** | `brew install ollama` |
-| **Linux** | `curl -fsSL https://ollama.com/install.sh \| sh` |
-| **Windows** | Download from [ollama.com/download](https://ollama.com/download/windows) |
-
-### 2. Install coderdodo
-
 ```bash
 npm i -g coderdodo
 ```
 
-That's it. **No other setup needed.** On first run, coderdodo will automatically start Ollama and download the model for you.
+That's it. **One command.** On first run, coderdodo will automatically:
+1. Install Ollama if not present (via `brew` on macOS, `curl` on Linux, `winget` or direct download on Windows)
+2. Start the Ollama server
+3. Download the AI model (~986MB, one-time)
+
+Then you're ready to go — no manual setup needed on any platform.
 
 ---
 

@@ -12,6 +12,100 @@ function isOllamaInstalled(): boolean {
   }
 }
 
+function installOllama(): void {
+  const platform = process.platform;
+
+  if (platform === 'darwin') {
+    // macOS: try brew first, fallback to curl installer
+    console.error(chalk.yellow('  Ollama not found. Installing automatically...'));
+    try {
+      execSync('which brew', { stdio: 'pipe' });
+      console.error(chalk.gray('  Running: brew install ollama'));
+      execSync('brew install ollama', { stdio: 'inherit' });
+      return;
+    } catch {
+      // brew not available, try direct install
+    }
+    try {
+      console.error(chalk.gray('  Downloading Ollama installer...'));
+      execSync('curl -fsSL https://ollama.com/install.sh | sh', { stdio: 'inherit' });
+      return;
+    } catch {
+      throw new Error('Failed to install Ollama automatically. Install manually from https://ollama.com/download');
+    }
+  }
+
+  if (platform === 'linux') {
+    console.error(chalk.yellow('  Ollama not found. Installing automatically...'));
+    try {
+      console.error(chalk.gray('  Running: curl -fsSL https://ollama.com/install.sh | sh'));
+      execSync('curl -fsSL https://ollama.com/install.sh | sh', { stdio: 'inherit' });
+      return;
+    } catch {
+      throw new Error('Failed to install Ollama automatically. Install manually from https://ollama.com/download');
+    }
+  }
+
+  if (platform === 'win32') {
+    console.error(chalk.yellow('  Ollama not found. Installing automatically...'));
+
+    // Try winget first (built into Windows 10/11)
+    try {
+      execSync('where winget', { stdio: 'pipe' });
+      console.error(chalk.gray('  Running: winget install Ollama.Ollama'));
+      execSync('winget install Ollama.Ollama --accept-package-agreements --accept-source-agreements', {
+        stdio: 'inherit',
+      });
+      // winget may need a PATH refresh
+      refreshPathWindows();
+      if (isOllamaInstalled()) return;
+    } catch {
+      // winget not available or failed
+    }
+
+    // Fallback: download and run the installer silently
+    try {
+      const installerUrl = 'https://ollama.com/download/OllamaSetup.exe';
+      const installerPath = `${process.env.TEMP || 'C:\\\\Temp'}\\\\OllamaSetup.exe`;
+      console.error(chalk.gray('  Downloading Ollama installer...'));
+      execSync(`curl -fsSL -o "${installerPath}" "${installerUrl}"`, { stdio: 'pipe' });
+      console.error(chalk.gray('  Running installer (this may take a minute)...'));
+      execSync(`"${installerPath}" /S`, { stdio: 'inherit' });
+      refreshPathWindows();
+      if (isOllamaInstalled()) return;
+    } catch {
+      // silent install failed
+    }
+
+    throw new Error(
+      'Could not install Ollama automatically.\n' +
+      '  Please install it manually from: https://ollama.com/download/windows\n' +
+      '  Then run coderdodo again.'
+    );
+  }
+
+  throw new Error('Unsupported platform. Install Ollama manually from https://ollama.com/download');
+}
+
+function refreshPathWindows(): void {
+  // After winget/installer, ollama might be in PATH but current process doesn't see it
+  // Common install locations on Windows
+  const paths = [
+    `${process.env.LOCALAPPDATA}\\Programs\\Ollama`,
+    `${process.env.PROGRAMFILES}\\Ollama`,
+    'C:\\Program Files\\Ollama',
+  ];
+  for (const p of paths) {
+    try {
+      execSync(`"${p}\\ollama.exe" --version`, { stdio: 'pipe' });
+      process.env.PATH = `${p};${process.env.PATH}`;
+      return;
+    } catch {
+      // not in this location
+    }
+  }
+}
+
 async function isOllamaRunning(): Promise<boolean> {
   try {
     const res = await fetch('http://127.0.0.1:11434/api/tags');
@@ -46,7 +140,6 @@ async function isModelAvailable(model: string): Promise<boolean> {
     if (!res.ok) return false;
     const data = await res.json();
     const models: string[] = (data.models || []).map((m: any) => m.name);
-    // Check both exact match and without tag (e.g. "qwen2.5-coder:1.5b" or "qwen2.5-coder")
     return models.some(
       (m) => m === model || m.startsWith(model + ':') || model.startsWith(m.split(':')[0])
     );
@@ -65,16 +158,14 @@ async function pullModel(model: string): Promise<void> {
 }
 
 export async function ensureReady(model: string): Promise<void> {
-  // 1. Check if Ollama is installed
+  // 1. Install Ollama if not present
   if (!isOllamaInstalled()) {
-    const platform = process.platform;
-    let installCmd = 'Visit https://ollama.com/download';
-    if (platform === 'darwin') installCmd = 'brew install ollama';
-    else if (platform === 'linux') installCmd = 'curl -fsSL https://ollama.com/install.sh | sh';
-    else if (platform === 'win32') installCmd = 'Download from https://ollama.com/download/windows';
-
-    showError(`Ollama is not installed. Install it with:\n\n  ${installCmd}\n`);
-    process.exit(1);
+    installOllama();
+    if (!isOllamaInstalled()) {
+      showError('Ollama installation failed. Please install manually from https://ollama.com/download');
+      process.exit(1);
+    }
+    console.error(chalk.green('  Ollama installed successfully!'));
   }
 
   // 2. Start Ollama if not running
